@@ -31,6 +31,16 @@ const authController = {
         } catch (error) {
             next(error)
         }
+    },
+
+    refreshToken : async (request, respone, next) => {
+        try {
+            const result = await authService.refreshToken(request)
+            const resData = responseSuccess(result, `Refresh token thanh cong`)
+            respone.status(resData.code).json(resData);
+        } catch (error) {
+            next(error)
+        }
     }
 };
 

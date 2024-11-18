@@ -1,8 +1,9 @@
-import { BadRequestError } from "../common/helpers/error.helper.js";
+import { BadRequestError, UnauthorizedError } from "../common/helpers/error.helper.js";
 import { prisma } from "../common/prisma/init.prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import tokenService from "./token.service.js";
+import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../common/constants/app.constants.js";
 
 const authService = {
     register: async (request) => {
@@ -103,6 +104,30 @@ const authService = {
         const tokens =tokenService.createTokens(userExists);
 
         return tokens
+    },
+
+    refreshToken: async (request) => {
+        console.log(request.headers)
+        const refreshToken = request.headers?.authorization?.split(' ')[1]
+        const accessToken = request.headers[`x-access-token`]
+
+        if (!refreshToken || !accessToken) throw new UnauthorizedError()
+
+        const decodedRefreshToken = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET)
+        const decodedAccessToken = jwt.verify(accessToken, ACCESS_TOKEN_SECRET, { ignoreExpiration: true })
+
+        if (decodedRefreshToken.user_id !== decodedAccessToken.user_id) throw new UnauthorizedError()
+        
+        const user = await prisma.users.findUnique({
+            where: {
+                user_id: decodedRefreshToken.user_id
+            }
+        })
+
+        const tokens =tokenService.createTokens(user);
+
+        return tokens
+
     }
 
 }
