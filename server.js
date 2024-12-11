@@ -5,12 +5,15 @@
 // Cách 1: dùng thư viện nodemon
 // Cách 2: dùng --watch của node hỗ trợ
 import express from "express";
-
+import { Server } from 'socket.io';
+import { createServer } from 'node:http';
 const app = express();
+const server = createServer(app);
 import cors from "cors";
 import { DataTypes, Sequelize } from "sequelize";
 import rootRouter from "./src/routers/root.router.js";
 import { handlerError } from "./src/common/helpers/error.helper.js";
+import initSocket from "./src/common/socket/init.socket.js";
 
 
 // sử dụng middleware chuyển JSON sang đối tượng JS (object, ...)
@@ -28,13 +31,17 @@ app.use(rootRouter);
 //model
 app.use(handlerError);
 
+initSocket(server);
+
 
 
 const PORT = 3069;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
    console.log(`Server online at port ${PORT}`);
 });
 
+
+ 
 
 // // 4 cách nhận dữ liệu
 // /**

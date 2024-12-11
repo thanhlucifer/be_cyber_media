@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import tokenService from "./token.service.js";
 import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../common/constants/app.constants.js";
+import { sendMail } from "../common/mail/send-mail.nodemailer.js";
 
 const authService = {
     register: async (request) => {
@@ -27,6 +28,8 @@ const authService = {
                 full_name
             }
         })
+
+        await sendMail(email, full_name)
 
         return usernew;
     },
@@ -128,6 +131,11 @@ const authService = {
 
         return tokens
 
+    },
+
+    getInfo: async (request) => {
+
+        return request.user
     }
 
 }

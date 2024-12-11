@@ -41,7 +41,17 @@ const authController = {
         } catch (error) {
             next(error)
         }
-    }
+    },
+
+    getInfo : async (request, respone, next) => {
+        try {
+            const result = await authService.getInfo(request)
+            const resData = responseSuccess(result, `Lay thong tin thanh cong`)
+            respone.status(resData.code).json(resData);
+        } catch (error) {
+            next(error)
+        }
+    },
 };
 
 export default authController
