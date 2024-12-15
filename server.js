@@ -14,6 +14,10 @@ import { DataTypes, Sequelize } from "sequelize";
 import rootRouter from "./src/routers/root.router.js";
 import { handlerError } from "./src/common/helpers/error.helper.js";
 import initSocket from "./src/common/socket/init.socket.js";
+import schema from "./src/common/graphql/schema.graphql.js";
+import root from "./src/common/graphql/root.graphql.js";
+import { createHandler } from "graphql-http/lib/use/express";
+import { ruruHTML } from "ruru/server";
 
 
 // sử dụng middleware chuyển JSON sang đối tượng JS (object, ...)
@@ -21,14 +25,23 @@ import initSocket from "./src/common/socket/init.socket.js";
 app.use(express.json());
 app.use(cors());
 
+app.use(express.static("."))
+
+app.get("/", (_req, res) => {
+   res.type("html")
+   res.end(ruruHTML({ endpoint: "/graphql" }))
+ })
+
+app.all(
+   "/graphql",
+   createHandler({
+     schema: schema,
+     rootValue: root,
+   })
+ )
+
 app.use(rootRouter);
 
-//sequelize
-
-
-
-
-//model
 app.use(handlerError);
 
 initSocket(server);
